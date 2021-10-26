@@ -1,49 +1,94 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/data/model/detail_restaurant.dart';
 import 'package:restaurant_app/data/model/list_restaurant.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'api_test.mocks.dart';
 
+@GenerateMocks([http.Client])
 void main() {
-  group('Network Call Test', () {
-    // arrange
-    ApiService? apiService;
-    setUp(() {
-      apiService = ApiService();
+  group('Fetch restaurant api', () {
+    final restaurantsList = [
+      RestaurantElement(
+          id: 'rqdv5juczeskfw1e867',
+          name: 'Melting Pot',
+          description: 'Lorem ipsum dolor sit amet.',
+          pictureId: '14',
+          city: 'medan',
+          rating: 4.2),
+      RestaurantElement(
+          id: 's1knt6za9kkfw1e867',
+          name: 'Kafe Kita',
+          description: 'Lorem ipsum dolor sit amet.',
+          pictureId: '25',
+          city: 'Gorontalo',
+          rating: 4),
+      RestaurantElement(
+          id: 'w9pga3s2tubkfw1e867',
+          name: 'Bring Your Phone Cafe',
+          description: 'Lorem ipsum dolor sit amet.',
+          pictureId: '25',
+          city: 'Gorontalo',
+          rating: 4),
+    ];
+
+    final responseExpected = ListRestaurant(
+        error: false,
+        message: 'success',
+        count: 3,
+        restaurants: restaurantsList);
+
+    test('should contain list of restaurant when api success', () async {
+      //arrange
+      final api = ApiService();
+      final mockClient = MockClient();
+
+      //act
+      var json = jsonEncode(responseExpected.toJson());
+      when(
+        mockClient.get(
+          Uri.parse('https://restaurant-api.dicoding.dev/list'),
+        ),
+      ).thenAnswer((_) async => http.Response(json, 200));
+
+      //assert
+      var restaurantActual = await api.restaurant(mockClient);
+      expect(restaurantActual, isA<ListRestaurant>());
     });
 
-    test('should return the true when checking the type of response', () async {
-      // act
-      var result = await apiService!.restaurant();
+    test('should contain list of restaurant when api failed', () {
+      //arrange
+      final api = ApiService();
+      final mockClient = MockClient();
 
-      // assert
-      await expectLater(result.restaurants, isA<List<RestaurantElement>>());
+      when(
+        mockClient.get(
+          Uri.parse('https://restaurant-api.dicoding.dev/list'),
+        ),
+      ).thenAnswer((_) async =>
+          http.Response('Failed to load list of restaurants', 404));
+
+      var restaurantActual = api.restaurant(mockClient);
+      expect(restaurantActual, throwsException);
     });
 
-    test('should return the length of response when called', () async {
-      // act
-      var result = await apiService!.restaurant();
+    test('should contain list of restaurant when no internet connection', () {
+      //arrange
+      final api = ApiService();
+      final client = MockClient();
 
-      // assert
-      await expectLater(result.restaurants.length, 20);
-    });
+      when(
+        client.get(
+          Uri.parse('https://restaurant-api.dicoding.dev/list'),
+        ),
+      ).thenAnswer(
+          (_) async => throw const SocketException('No Internet Connection'));
 
-    test('should return the true when checking the type of response', () async {
-      // act
-      var result =
-          await apiService!.detailRestaurant(id: 'rqdv5juczeskfw1e867');
-
-      // assert
-      await expectLater(result.restaurant, isA<Restaurant>());
-    });
-
-    test('should return true when searching by query', () async {
-      // arrange
-      String query = 'Melting Pot';
-      // act
-      var result = await apiService!.searchRestaurant(query: query);
-
-      // assert
-      expect(result.restaurants[0].name.contains(query), true);
+      var restaurantActual = api.restaurant(client);
+      expect(restaurantActual, throwsException);
     });
   });
 }

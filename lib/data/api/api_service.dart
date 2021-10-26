@@ -12,8 +12,8 @@ class ApiService {
   static const String _review = '/review';
   static const String _search = '/search?q=';
 
-  Future<ListRestaurant> restaurant() async {
-    final response = await http.get(Uri.parse(_baseUrl + _listRestaurant));
+  Future<ListRestaurant> restaurant(http.Client client) async {
+    final response = await client.get(Uri.parse(_baseUrl + _listRestaurant));
 
     if (response.statusCode == 200) {
       return ListRestaurant.fromJson(json.decode(response.body));
