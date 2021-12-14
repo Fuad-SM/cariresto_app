@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/theme/theme.dart';
-import 'package:restaurant_app/utils/const.dart';
+import 'package:restaurant_app/data/provider/preferences_provider.dart';
 import 'package:restaurant_app/utils/background_service.dart';
+import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/utils/notification_helper.dart';
 
 class GetStartedScreen extends StatefulWidget {
@@ -44,55 +46,64 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
       backgroundColor: whiteColor,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 10),
-        child: IntroductionScreen(
-          key: introKey,
-          globalBackgroundColor: Colors.white,
-          pages: [
-            PageViewModel(
-              title: 'Brows App\nand Order Now',
-              body:
-                  'We have many recipes for you\nGo and select food what you want.',
-              image: Image.asset('assets/images/girl_phone.png'),
-              decoration: pageDecoration,
+        child: Consumer<PreferencesProvider>(
+            builder: (context, preferences, child) {
+          return IntroductionScreen(
+            key: introKey,
+            globalBackgroundColor: Colors.white,
+            pages: [
+              PageViewModel(
+                title: 'Brows App\nand Order Now',
+                body:
+                    'We have many recipes for you\nGo and select food what you want.',
+                image: Image.asset('assets/images/girl_phone.png'),
+                decoration: pageDecoration,
+              ),
+              PageViewModel(
+                title: 'Best Delicious\nFood in your Area',
+                body:
+                    'We provide best food to our\ncustomer healthy and organic',
+                image: Image.asset('assets/images/noodle.png'),
+                decoration: pageDecoration,
+              ),
+              PageViewModel(
+                title: 'We Provide Fast\nFood Service',
+                body:
+                    'We provide organic food service\n our customer from anywhere',
+                image: Image.asset('assets/images/beefsteak.png'),
+                decoration: pageDecoration,
+              ),
+            ],
+            // onDone: () => Navigator.pushReplacementNamed(context, homeRoute),
+            onDone: () async {
+              preferences.pageStarted(homeRoute);
+              print(preferences.isStartedActive);
+              Navigator.pushReplacementNamed(context, homeRoute);
+            },
+            showSkipButton: true,
+            skipFlex: 0,
+            nextFlex: 0,
+            skip: Text(
+              'Skip',
+              style: yellowTextStyle.copyWith(fontWeight: FontWeight.w600),
             ),
-            PageViewModel(
-              title: 'Best Delicious\nFood in your Area',
-              body: 'We provide best food to our\ncustomer healthy and organic',
-              image: Image.asset('assets/images/noodle.png'),
-              decoration: pageDecoration,
+            next: const Icon(Icons.arrow_forward),
+            done: Text(
+              'Next',
+              style: yellowTextStyle.copyWith(fontWeight: FontWeight.w600),
             ),
-            PageViewModel(
-              title: 'We Provide Fast\nFood Service',
-              body:
-                  'We provide organic food service\n our customer from anywhere',
-              image: Image.asset('assets/images/beefsteak.png'),
-              decoration: pageDecoration,
+            curve: Curves.fastLinearToSlowEaseIn,
+            dotsDecorator: const DotsDecorator(
+              size: Size(10.0, 10.0),
+              color: Color(0xFFBDBDBD),
+              activeColor: Color(0xffFEB801),
+              activeSize: Size(24.0, 10.0),
+              activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              ),
             ),
-          ],
-          onDone: () => Navigator.pushReplacementNamed(context, homeRoute),
-          showSkipButton: true,
-          skipFlex: 0,
-          nextFlex: 0,
-          skip: Text(
-            'Skip',
-            style: yellowTextStyle.copyWith(fontWeight: FontWeight.w600),
-          ),
-          next: const Icon(Icons.arrow_forward),
-          done: Text(
-            'Next',
-            style: yellowTextStyle.copyWith(fontWeight: FontWeight.w600),
-          ),
-          curve: Curves.fastLinearToSlowEaseIn,
-          dotsDecorator: const DotsDecorator(
-            size: Size(10.0, 10.0),
-            color: Color(0xFFBDBDBD),
-            activeColor: Color(0xffFEB801),
-            activeSize: Size(24.0, 10.0),
-            activeShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(25.0)),
-            ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }

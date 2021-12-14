@@ -66,6 +66,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    Card(
+                      child: Text(
+                        preferences.isStartedActive!,
+                        style: greyTextStyle.copyWith(fontSize: 12),
+                      ),
                     )
                   ],
                 ),

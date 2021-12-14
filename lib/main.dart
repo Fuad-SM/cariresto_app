@@ -7,7 +7,6 @@ import 'package:restaurant_app/common/routes/navigation.dart';
 import 'package:restaurant_app/common/routes/route_generator.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/database/database_helper.dart';
-import 'package:restaurant_app/utils/const.dart';
 import 'package:restaurant_app/data/preferences/preferences_helper.dart';
 import 'package:restaurant_app/data/provider/database_provider.dart';
 import 'package:restaurant_app/data/provider/detail_restaurant_provider.dart';
@@ -66,13 +65,17 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<SchedulingProvider>.value(
             value: SchedulingProvider())
       ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        title: 'Restaurant App',
-        theme: ThemeData(primarySwatch: Colors.amber),
-        onGenerateRoute: RouteGenerator.generateRoute,
-        initialRoute: getStartedRoute,
+      child: Consumer<PreferencesProvider>(
+        builder: (context, preferences, child) {
+          return MaterialApp(
+            navigatorKey: navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: 'Restaurant App',
+            theme: ThemeData(primarySwatch: Colors.amber),
+            onGenerateRoute: RouteGenerator.generateRoute,
+            initialRoute: preferences.isStartedActive,
+          );
+        },
       ),
     );
   }
